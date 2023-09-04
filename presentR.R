@@ -200,7 +200,7 @@ draw.slides <- function(slides, return.on.last=FALSE, preservePar=FALSE, ...){
             break
         if(j == 'c')
             next
-        if(i >= length(slides) && return.on.last)
+        if(i > length(slides) && return.on.last)
             break
         i <- ifelse(i < 1, 1, i)
         i <- ifelse(i > length(slides), length(slides), i)
