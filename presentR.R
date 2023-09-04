@@ -164,8 +164,11 @@ get.input <- function(ret.keys=c(' ', 'n', 'Right', 'p', 'Left'), mouse.keys=c('
 ## draw.f should be a function that draws the slide
 ## draw.f may return a list whose members can change the behaviour
 ## of the next slide (eg, preserve.par)
-draw.screen <- function(draw.f, prompt="Waiting for input", ...){
-    dr.ret <- draw.f(...);
+draw.screen <- function(draw.f, prompt="Waiting for input", slide.i=0, ...){
+    if(slide.i > 0)
+        dr.ret <- draw.f(slide.i=slide.i, ...)
+    else
+        dr.ret <- draw.f(...);
     ## for panning and zooming we need to have xlim and ylim defined and these must be settable.
     ## if they are returned, then we may assume that they are arguments to the function;
     if(!is.null(dr.ret$xlim) && !is.null(dr.ret$ylim)){
@@ -178,11 +181,15 @@ draw.screen <- function(draw.f, prompt="Waiting for input", ...){
 }
 
 ## slides should be a list of functions that do something cool.
-draw.slides <- function(slides, return.on.last=FALSE, preservePar=FALSE, ...){
+draw.slides <- function(slds, return.on.last=FALSE, preservePar=FALSE, slide.i=FALSE, ...){
     i <- 1
     org.par <- par(no.readonly=TRUE)
-    while(i <= length(slides)){
-        ctl <- draw.screen( slides[[i]], prompt=paste("Slide", i), ... )
+    while(i <= length(slds)){
+        print(paste( "Slide number:", i ))
+        if(slide.i)
+            ctl <- draw.screen( slds[[i]], prompt=paste("Slide", i), slide.i=i, ... )
+        else
+            ctl <- draw.screen( slds[[i]], prompt=paste("Slide", i), ... )
         if(!preservePar &&  (is.null(ctl$dr) || is.null(ctl$dr$preservePar)))
             par(org.par)
         j <- ctl$gr
@@ -200,10 +207,10 @@ draw.slides <- function(slides, return.on.last=FALSE, preservePar=FALSE, ...){
             break
         if(j == 'c')
             next
-        if(i > length(slides) && return.on.last)
+        if(i > length(slds) && return.on.last)
             break
         i <- ifelse(i < 1, 1, i)
-        i <- ifelse(i > length(slides), length(slides), i)
+        i <- ifelse(i > length(slds), length(slds), i)
     }
 }
 
